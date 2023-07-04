@@ -13,7 +13,7 @@ import java.util.List;
 public class HotelManagmentService {
 
 
-    @Autowired
+
     HotelManagementRepository hotelManagementRepository;
 
     public String addHotel(Hotel hotel) {

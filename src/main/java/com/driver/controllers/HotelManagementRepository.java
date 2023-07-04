@@ -4,9 +4,10 @@ import com.driver.model.Facility;
 import com.driver.model.Hotel;
 import com.driver.model.User;
 import com.driver.model.Booking;
+import org.springframework.stereotype.Repository;
 
 import java.util.*;
-
+@Repository
 public class HotelManagementRepository {
 
 
