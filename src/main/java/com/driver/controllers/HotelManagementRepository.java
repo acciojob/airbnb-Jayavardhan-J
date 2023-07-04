@@ -71,7 +71,7 @@ public class HotelManagementRepository {
     }
 
     public Hotel updateFacilities(List<Facility> newFacilities, String hotelName) {
-        List<Facility> old = new ArrayList<>();
+        List<Facility> old = hotelMap.get(hotelName).getFacilities();
         for(Facility facility:newFacilities){
             if(old.contains(facility))continue;
             else old.add(facility);
