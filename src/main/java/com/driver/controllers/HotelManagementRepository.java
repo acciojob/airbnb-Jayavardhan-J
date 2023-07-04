@@ -1,103 +1,84 @@
 package com.driver.controllers;
 
+import com.driver.model.Booking;
 import com.driver.model.Facility;
 import com.driver.model.Hotel;
 import com.driver.model.User;
-import com.driver.model.Booking;
+import io.swagger.models.auth.In;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+
 @Repository
 public class HotelManagementRepository {
+    Map<String,Hotel> hotelMap = new HashMap<>();
+    Map<Integer,User> userMap = new HashMap<>();
+    Map<String,Booking> bookingMap= new HashMap<>();
+    Map<Integer,Integer> countMap = new HashMap<>();
 
-
-    private Map<String,Hotel> hotelDB = new HashMap<>();
-    private Map<Integer,User> userDB = new HashMap<>();
-
-    private HashMap<String,Booking> bookingDb = new HashMap<>();
-
-    private HashMap<Integer,Integer> countOfBookings = new HashMap<>();
     public String addHotel(Hotel hotel) {
-        if(hotelDB.containsKey(hotel.getHotelName()) || hotel==null || hotel.getHotelName()==null)return "FAILURE";
-        hotelDB.put(hotel.getHotelName(),hotel);
+        if(hotel==null || hotel.getHotelName()==null || hotelMap.containsKey(hotel.getHotelName()))return "FAILURE";
+        hotelMap.put(hotel.getHotelName(),hotel);
         return "SUCCESS";
     }
 
     public Integer addUser(User user) {
-        userDB.put(user.getaadharCardNo(), user);
+        userMap.put(user.getaadharCardNo(),user);
         return user.getaadharCardNo();
     }
 
     public String getHotelWithMostFacilities() {
-        int facilities= 0;
-
-        String hotelName = "";
-
-        for(Hotel hotel:hotelDB.values()){
-
-            if(hotel.getFacilities().size()>facilities){
-                facilities = hotel.getFacilities().size();
-                hotelName = hotel.getHotelName();
+        int facility=0;
+        String hotelName="";
+        for(Hotel hotel : hotelMap.values()){
+            if(hotel.getFacilities().size()>facility){
+                facility=hotel.getFacilities().size();
+                hotelName=hotel.getHotelName();
             }
-            else if(hotel.getFacilities().size()==facilities){
+            else if(hotel.getFacilities().size()==facility){
                 if(hotel.getHotelName().compareTo(hotelName)<0){
-                    hotelName = hotel.getHotelName();
+                    hotelName=hotel.getHotelName();
                 }
             }
         }
         return hotelName;
     }
-    public int bookARoom(Booking booking){
-        String key = UUID.randomUUID().toString();
 
-        booking.setBookingId(key);
+    public int bookARoom(Booking booking) {
+        String bookingID= UUID.randomUUID().toString();
+        booking.setBookingId(bookingID);
+        String hotelName =booking.getHotelName();
+        Hotel hotel = hotelMap.get(hotelName);
+        if(booking.getNoOfRooms()>hotel.getAvailableRooms())return -1;
 
-        String hotelName = booking.getHotelName();
+        int amount = booking.getNoOfRooms()*hotel.getPricePerNight();
+        booking.setAmountToBePaid(amount);
 
-        Hotel hotel = hotelDB.get(hotelName);
-
-        int availableRooms = hotel.getAvailableRooms();
-
-        if(availableRooms<booking.getNoOfRooms()){
-            return -1;
-        }
-
-        int amountToBePaid = hotel.getPricePerNight()*booking.getNoOfRooms();
-        booking.setAmountToBePaid(amountToBePaid);
-
-        //Make sure we check this part of code as well
         hotel.setAvailableRooms(hotel.getAvailableRooms()-booking.getNoOfRooms());
+        bookingMap.put(bookingID,booking);
+        hotelMap.put(hotelName,hotel);
 
-        bookingDb.put(key,booking);
+        int aadhar = booking.getBookingAadharCard();
+        Integer bookings = countMap.get(aadhar);
+        countMap.put(aadhar,(bookings==null)?1:bookings+1);
+        return amount;
 
-        hotelDB.put(hotelName,hotel);
-
-        int aadharCard = booking.getBookingAadharCard();
-        Integer currentBookings = countOfBookings.get(aadharCard);
-        countOfBookings.put(aadharCard, Objects.nonNull(currentBookings)?1+currentBookings:1);
-        return amountToBePaid;
-    }
-    public int getBooking(Integer adharCard){
-        return countOfBookings.get(adharCard);
     }
 
-    public Hotel updateFacility(List<Facility> newFacilities, String hotelName){
-        List<Facility> oldFacilities = hotelDB.get(hotelName).getFacilities();
+    public int getBookings(Integer aadharCard) {
+        return countMap.get(aadharCard);
+    }
 
-        for(Facility facility: newFacilities){
-
-            if(oldFacilities.contains(facility)){
-                continue;
-            }else{
-                oldFacilities.add(facility);
-            }
+    public Hotel updateFacilities(List<Facility> newFacilities, String hotelName) {
+        List<Facility> old = new ArrayList<>();
+        for(Facility facility:newFacilities){
+            if(old.contains(facility))continue;
+            else old.add(facility);
         }
-
-        Hotel hotel = hotelDB.get(hotelName);
-        hotel.setFacilities(oldFacilities);
-
-        hotelDB.put(hotelName,hotel);
-
+        Hotel hotel= hotelMap.get(hotelName);
+        hotel.setFacilities(old);
+        hotelMap.put(hotelName,hotel);
         return hotel;
     }
 }

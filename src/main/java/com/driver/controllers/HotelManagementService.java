@@ -10,11 +10,9 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class HotelManagmentService {
-
-
-
-    HotelManagementRepository hotelManagementRepository = new HotelManagementRepository();
+public class HotelManagementService {
+    @Autowired
+    HotelManagementRepository hotelManagementRepository;
 
     public String addHotel(Hotel hotel) {
         return hotelManagementRepository.addHotel(hotel);
@@ -27,18 +25,16 @@ public class HotelManagmentService {
     public String getHotelWithMostFacilities() {
         return hotelManagementRepository.getHotelWithMostFacilities();
     }
-    public int bookARoom(Booking booking){
+
+    public int bookARoom(Booking booking) {
         return hotelManagementRepository.bookARoom(booking);
     }
 
-    public int getBooking(Integer adharCard){
-
-        int count = hotelManagementRepository.getBooking(adharCard);
-        return count;
+    public int getBookings(Integer aadharCard) {
+        return hotelManagementRepository.getBookings(aadharCard);
     }
 
-    public Hotel updateFacility(List<Facility> newFacilities, String hotelName){
-
-        return hotelManagementRepository.updateFacility(newFacilities, hotelName);
+    public Hotel updateFacilities(List<Facility> newFacilities, String hotelName) {
+        return hotelManagementRepository.updateFacilities(newFacilities,hotelName);
     }
 }
