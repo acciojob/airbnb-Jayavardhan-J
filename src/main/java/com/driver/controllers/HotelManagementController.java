@@ -19,7 +19,7 @@ import java.util.List;
 @RequestMapping("/hotel")
 public class HotelManagementController {
 
-    HotelManagmentService hotelManagmentService;
+    HotelManagmentService hotelManagmentService = new HotelManagmentService();
     @PostMapping("/add-hotel")
     public String addHotel(@RequestBody Hotel hotel){
 
